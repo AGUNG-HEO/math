@@ -1,15 +1,16 @@
 "use client";
 
 import React, { useState, useRef } from "react";
-import { Gamepad2, Sparkles, PlusCircle, BookOpen, Trophy, Cpu, Gamepad } from "lucide-react";
+import { Gamepad2, Sparkles, PlusCircle, BookOpen, Trophy, Calculator, Gamepad } from "lucide-react";
 import SieveGame from "@/components/SieveGame";
+import LinearEquationGame from "@/components/LinearEquationGame";
 
 export default function Home() {
-  const [showGame, setShowGame] = useState<boolean>(false);
+  const [activeTab, setActiveTab] = useState<"sieve" | "linear">("linear");
   const gameRef = useRef<HTMLDivElement>(null);
 
-  const handleToggleGame = () => {
-    setShowGame(true);
+  const handleSelectTab = (tab: "sieve" | "linear") => {
+    setActiveTab(tab);
     setTimeout(() => {
       gameRef.current?.scrollIntoView({ behavior: "smooth" });
     }, 100);
@@ -30,42 +31,38 @@ export default function Home() {
                 아궁진영의 수학교실
               </span>
               <span className="text-[10px] font-mono text-slate-400 tracking-wider">
-                MATH ARCADE EDITION v1.0
+                MATH ARCADE & SUPABASE v1.0
               </span>
             </div>
           </div>
 
           {/* 네비게이션 공간 */}
           <nav className="hidden md:flex items-center space-x-6 text-sm font-semibold">
-            <a
-              href="#hero"
-              className="text-slate-300 hover:text-[#00f0ff] transition-colors flex items-center gap-1.5"
+            <button
+              onClick={() => handleSelectTab("linear")}
+              className={`transition-colors flex items-center gap-1.5 ${
+                activeTab === "linear" ? "text-[#ff007f]" : "text-slate-300 hover:text-[#ff007f]"
+              }`}
             >
-              <BookOpen className="w-4 h-4 text-[#00f0ff]" />
-              학습 코스
-            </a>
-            <a
-              href="#sieve-game-section"
-              onClick={handleToggleGame}
-              className="text-slate-300 hover:text-[#facc15] transition-colors flex items-center gap-1.5"
+              <Calculator className="w-4 h-4 text-[#ff007f]" />
+              일차방정식 챌린지
+            </button>
+            <button
+              onClick={() => handleSelectTab("sieve")}
+              className={`transition-colors flex items-center gap-1.5 ${
+                activeTab === "sieve" ? "text-[#00f0ff]" : "text-slate-300 hover:text-[#00f0ff]"
+              }`}
             >
-              <Gamepad className="w-4 h-4 text-[#facc15]" />
+              <Gamepad className="w-4 h-4 text-[#00f0ff]" />
               에라토스테네스의 체
-            </a>
-            <a
-              href="#features"
-              className="text-slate-300 hover:text-[#ff007f] transition-colors flex items-center gap-1.5"
-            >
-              <Trophy className="w-4 h-4 text-[#ff007f]" />
-              대시보드
-            </a>
+            </button>
           </nav>
         </div>
       </header>
 
       {/* ==================== 메인 화면 (Hero Section) ==================== */}
       <main className="flex-1 flex flex-col items-center justify-center px-6 py-12 relative overflow-hidden">
-        {/* 네온 배경 장식 라이트 (Neon Glow Accents) */}
+        {/* 네온 배경 장식 라이트 */}
         <div className="absolute top-1/4 -left-20 w-80 h-80 bg-[#00f0ff]/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-1/4 -right-20 w-80 h-80 bg-[#ff007f]/10 rounded-full blur-3xl pointer-events-none" />
 
@@ -73,79 +70,51 @@ export default function Home() {
           {/* 서브 뱃지 */}
           <div className="inline-flex items-center space-x-2 px-4 py-2 rounded-full bg-slate-800/80 border border-[#00f0ff]/30 text-xs font-mono text-[#00f0ff] shadow-[0_0_12px_rgba(0,240,255,0.15)]">
             <Sparkles className="w-4 h-4 text-[#facc15]" />
-            <span>INTERACTIVE MATH PLATFORM</span>
+            <span>SUPABASE INTEGRATED MATH PLATFORM</span>
           </div>
 
-          {/* 환영 문구 (Main Heading) */}
+          {/* 환영 문구 */}
           <h1 className="text-4xl sm:text-6xl font-black tracking-tight leading-tight">
-            <span className="block text-slate-100">나만의 교육용</span>
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#00f0ff] via-[#facc15] to-[#ff007f] glow-cyan">
-              웹앱 만들기
+            <span className="block text-slate-100">일차방정식 풀기 &</span>
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#ff007f] via-[#facc15] to-[#00f0ff] glow-pink">
+              Supabase 점수 저장
             </span>
           </h1>
 
           {/* 간단한 설명 */}
           <p className="text-slate-300 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed font-normal">
-            세련된 오락실 느낌의 감성과 직관적인 3D 인터랙티브 버튼으로 즐겁게
-            수학을 배우는 차세대 네온 게이밍 학습 공간입니다.
+            방정식을 풀고 맞춘 문제 수를 Supabase 클라우드 데이터베이스에 기록해보세요!
+            친구들과의 실시간 랭킹도 한눈에 확인할 수 있습니다.
           </p>
 
-          {/* 새로운 학습 기능 추가하기 버튼 */}
-          <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
+          {/* 탭 전환 버튼 모음 */}
+          <div className="pt-2 flex flex-wrap items-center justify-center gap-4">
             <button
               type="button"
-              onClick={handleToggleGame}
-              className="btn-arcade btn-arcade-cyan px-8 py-4 text-base tracking-wide flex items-center gap-2 group shadow-lg"
+              onClick={() => handleSelectTab("linear")}
+              className={`btn-arcade px-8 py-4 text-base tracking-wide flex items-center gap-2 ${
+                activeTab === "linear" ? "btn-arcade-pink" : "bg-slate-800 text-slate-300 border-slate-700"
+              }`}
             >
-              <PlusCircle className="w-5 h-5 group-hover:rotate-90 transition-transform" />
-              <span>새로운 학습 기능 추가하기 (에라토스테네스의 체)</span>
+              <Calculator className="w-5 h-5" />
+              <span>📐 일차방정식 챌린지 (Supabase 연동)</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleSelectTab("sieve")}
+              className={`btn-arcade px-8 py-4 text-base tracking-wide flex items-center gap-2 ${
+                activeTab === "sieve" ? "btn-arcade-cyan" : "bg-slate-800 text-slate-300 border-slate-700"
+              }`}
+            >
+              <Gamepad className="w-5 h-5" />
+              <span>🕹️ 에라토스테네스의 체 게임</span>
             </button>
           </div>
 
-          {/* ==================== 에라토스테네스의 체 게임 섹션 ==================== */}
-          {(showGame || true) && (
-            <div id="sieve-game-section" ref={gameRef} className="pt-10 transition-all duration-500">
-              <SieveGame />
-            </div>
-          )}
-
-          {/* 기능 카드 그리드 (Demo Cards) */}
-          <div className="pt-16 grid grid-cols-1 sm:grid-cols-3 gap-6 text-left">
-            <div className="p-6 rounded-2xl bg-slate-800/50 border border-slate-700/60 hover:border-[#00f0ff]/60 transition-all shadow-lg hover:shadow-[0_0_20px_rgba(0,240,255,0.15)]">
-              <div className="w-10 h-10 rounded-xl bg-[#00f0ff]/10 flex items-center justify-center text-[#00f0ff] mb-4 font-extrabold">
-                01
-              </div>
-              <h3 className="text-lg font-bold text-slate-100 mb-2">
-                에라토스테네스의 체
-              </h3>
-              <p className="text-sm text-slate-400">
-                1부터 100까지 소수의 배수를 신나게 타격하며 진짜 소수를 찾는 아케이드 게임.
-              </p>
-            </div>
-
-            <div className="p-6 rounded-2xl bg-slate-800/50 border border-slate-700/60 hover:border-[#ff007f]/60 transition-all shadow-lg hover:shadow-[0_0_20px_rgba(255,0,127,0.15)]">
-              <div className="w-10 h-10 rounded-xl bg-[#ff007f]/10 flex items-center justify-center text-[#ff007f] mb-4 font-extrabold">
-                02
-              </div>
-              <h3 className="text-lg font-bold text-slate-100 mb-2">
-                네온 게이밍 랭킹
-              </h3>
-              <p className="text-sm text-slate-400">
-                선생님과 학생들이 다 함께 스코어를 겨루는 아케이드 수학 리그.
-              </p>
-            </div>
-
-            <div className="p-6 rounded-2xl bg-slate-800/50 border border-slate-700/60 hover:border-[#facc15]/60 transition-all shadow-lg hover:shadow-[0_0_20px_rgba(250,204,21,0.15)]">
-              <div className="w-10 h-10 rounded-xl bg-[#facc15]/10 flex items-center justify-center text-[#facc15] mb-4 font-extrabold">
-                03
-              </div>
-              <h3 className="text-lg font-bold text-slate-100 mb-2">
-                맞춤형 학습 리포트
-              </h3>
-              <p className="text-sm text-slate-400">
-                개인별 성장 수치와 소수 정답률을 한눈에 분석하는 대시보드.
-              </p>
-            </div>
+          {/* ==================== 게임 컨테이너 섹션 ==================== */}
+          <div ref={gameRef} className="pt-10 transition-all duration-500">
+            {activeTab === "linear" ? <LinearEquationGame /> : <SieveGame />}
           </div>
         </div>
       </main>
@@ -157,7 +126,7 @@ export default function Home() {
           <div className="flex items-center space-x-4 text-slate-400">
             <span className="text-[#00f0ff]">NEXT.JS APP ROUTER</span>
             <span>•</span>
-            <span className="text-[#ff007f]">TAILWIND CSS</span>
+            <span className="text-[#ff007f]">SUPABASE REALTIME</span>
             <span>•</span>
             <span className="text-[#facc15]">VERCEL READY</span>
           </div>
