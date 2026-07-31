@@ -2,6 +2,7 @@
   "name": "math-app",
   "version": "0.1.0",
   "private": true,
+  "main": "src/app/page.tsx",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
