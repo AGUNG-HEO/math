@@ -10,14 +10,15 @@ import {
   Save,
   User,
   Sparkles,
-  Zap,
+  Settings,
 } from "lucide-react";
-import { supabase, StudentScoreRecord } from "@/lib/supabase";
+import { supabase, StudentScoreRecord, getSupabaseCredentials } from "@/lib/supabase";
+import SupabaseConfigModal from "./SupabaseConfigModal";
 
 interface ExpressionProblem {
   displayStr: string;
-  correctCoeff: number; // Coefficient of x
-  correctConst: number; // Constant term
+  correctCoeff: number;
+  correctConst: number;
 }
 
 export default function LinearExpressionGame() {
@@ -42,13 +43,13 @@ export default function LinearExpressionGame() {
   const [leaderboard, setLeaderboard] = useState<StudentScoreRecord[]>([]);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveStatus, setSaveStatus] = useState<string>("");
+  const [isConfigOpen, setIsConfigOpen] = useState<boolean>(false);
 
   // Generate random Linear Expression Addition & Subtraction problems
   const generateProblem = (): ExpressionProblem => {
-    const pType = Math.floor(Math.random() * 3); // 0: Basic Add/Sub, 1: Subtraction with parens, 2: Scalar multiplier
+    const pType = Math.floor(Math.random() * 3);
 
     if (pType === 0) {
-      // (ax + b) + (cx + d)
       const a = Math.floor(Math.random() * 9) + 1;
       const b = Math.floor(Math.random() * 19) - 9;
       const c = Math.floor(Math.random() * 9) + 1;
@@ -64,7 +65,6 @@ export default function LinearExpressionGame() {
         correctConst: b + d,
       };
     } else if (pType === 1) {
-      // (ax + b) - (cx + d)
       const a = Math.floor(Math.random() * 9) + 2;
       const b = Math.floor(Math.random() * 19) - 9;
       const c = Math.floor(Math.random() * 9) + 1;
@@ -80,8 +80,7 @@ export default function LinearExpressionGame() {
         correctConst: b - d,
       };
     } else {
-      // k(ax + b) + m(cx + d)
-      const k = Math.floor(Math.random() * 3) + 2; // 2 or 3
+      const k = Math.floor(Math.random() * 3) + 2;
       const a = Math.floor(Math.random() * 5) + 1;
       const b = Math.floor(Math.random() * 9) - 4;
       const m = Math.floor(Math.random() * 2) === 0 ? 1 : -1;
@@ -162,6 +161,15 @@ export default function LinearExpressionGame() {
 
   // Fetch leaderboard for expression scores
   const fetchLeaderboard = async () => {
+    const localRecordsStr = localStorage.getItem("local_expression_scores");
+    let localData: StudentScoreRecord[] = localRecordsStr ? JSON.parse(localRecordsStr) : [];
+
+    const creds = getSupabaseCredentials();
+    if (!creds.isConfigured) {
+      setLeaderboard(localData);
+      return;
+    }
+
     try {
       const { data, error } = await supabase
         .from("expression_scores")
@@ -169,11 +177,13 @@ export default function LinearExpressionGame() {
         .order("score", { ascending: false })
         .limit(10);
 
-      if (!error && data) {
+      if (!error && data && data.length > 0) {
         setLeaderboard(data as StudentScoreRecord[]);
+      } else {
+        setLeaderboard(localData);
       }
     } catch (err) {
-      console.log("Supabase fetch notice:", err);
+      setLeaderboard(localData);
     }
   };
 
@@ -181,32 +191,53 @@ export default function LinearExpressionGame() {
     fetchLeaderboard();
   }, []);
 
-  // Save score record to Supabase
+  // Save score record to Supabase with Failed to Fetch handling
   const handleSaveScore = async () => {
     if (!studentName || totalQuestions === 0) return;
     setIsSaving(true);
-    setSaveStatus("Supabase에 저장하는 중...");
+    setSaveStatus("저장 확인 중...");
 
     const accuracy = Math.round((score / totalQuestions) * 100);
-
-    const record: StudentScoreRecord = {
+    const newRecord: StudentScoreRecord = {
       student_name: studentName,
       score: score,
       total_questions: totalQuestions,
       accuracy: accuracy,
     };
 
+    // Save to LocalStorage fallback
+    const localStr = localStorage.getItem("local_expression_scores");
+    let localList: StudentScoreRecord[] = localStr ? JSON.parse(localStr) : [];
+    localList.push(newRecord);
+    localList.sort((a, b) => b.score - a.score);
+    localStorage.setItem("local_expression_scores", JSON.stringify(localList.slice(0, 10)));
+
+    const creds = getSupabaseCredentials();
+    if (!creds.isConfigured) {
+      setSaveStatus(
+        "⚠️ Supabase URL이 아직 설정되지 않았습니다. [⚙️ Supabase 연동 설정] 버튼에서 URL/Key를 등록하세요. (점수는 현재 브라우저에 저장됨)"
+      );
+      setLeaderboard(localList.slice(0, 10));
+      setIsSaving(false);
+      return;
+    }
+
     try {
-      const { error } = await supabase.from("expression_scores").insert([record]);
+      const { error } = await supabase.from("expression_scores").insert([newRecord]);
 
       if (error) {
-        setSaveStatus(`⚠️ 저장 실패 (Supabase 테이블 확인 필요): ${error.message}`);
+        setSaveStatus(
+          `⚠️ Supabase 저장 안내: ${error.message} (Supabase SQL Editor에서 expression_scores 테이블이 생성되었는지 확인해주세요. 점수는 브라우저에 저장되었습니다)`
+        );
       } else {
-        setSaveStatus("✅ Supabase DB(expression_scores)에 일차식 풀이 기록이 저장되었습니다!");
+        setSaveStatus("✅ Supabase 클라우드 데이터베이스에 일차식 기록이 저장되었습니다!");
         fetchLeaderboard();
       }
     } catch (err: any) {
-      setSaveStatus("✅ 저장 완료 (세션 기록됨)");
+      setSaveStatus(
+        "⚠️ Supabase 서버 연결 실패 (Failed to fetch). URL/API Key 및 인터넷 연결을 확인하거나 [⚙️ Supabase 연동 설정]을 클릭해 올바른 URL을 입력해주세요. (점수는 브라우저에 임시 저장됨)"
+      );
+      setLeaderboard(localList.slice(0, 10));
     } finally {
       setIsSaving(false);
     }
@@ -214,6 +245,12 @@ export default function LinearExpressionGame() {
 
   return (
     <div className="w-full max-w-5xl mx-auto p-6 sm:p-8 rounded-3xl bg-slate-900/90 border-2 border-[#facc15]/40 shadow-[0_0_50px_rgba(250,204,21,0.2)] text-slate-100 space-y-8 relative overflow-hidden backdrop-blur-xl">
+      <SupabaseConfigModal
+        isOpen={isConfigOpen}
+        onClose={() => setIsConfigOpen(false)}
+        onSaved={fetchLeaderboard}
+      />
+
       {/* Background Glows */}
       <div className="absolute top-0 right-0 w-64 h-64 bg-[#facc15]/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#ff007f]/10 rounded-full blur-3xl pointer-events-none" />
@@ -233,29 +270,39 @@ export default function LinearExpressionGame() {
           </p>
         </div>
 
-        {/* Action Controls */}
-        {isRegistered && (
-          <div className="flex items-center gap-3">
-            <button
-              onClick={handleSaveScore}
-              disabled={isSaving || totalQuestions === 0}
-              className="btn-arcade btn-arcade-yellow px-4 py-2.5 text-xs font-bold flex items-center gap-1.5"
-            >
-              <Save className="w-4 h-4" />
-              <span>Supabase에 기록 저장</span>
-            </button>
+        {/* Top Controls */}
+        <div className="flex flex-wrap items-center justify-center gap-3">
+          <button
+            onClick={() => setIsConfigOpen(true)}
+            className="btn-arcade bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700 px-3 py-2.5 text-xs flex items-center gap-1.5"
+          >
+            <Settings className="w-4 h-4 text-[#facc15]" />
+            <span>Supabase 연동 설정</span>
+          </button>
 
-            <button
-              onClick={() => {
-                setIsRegistered(false);
-                setStudentName("");
-              }}
-              className="btn-arcade bg-slate-800 text-slate-300 border-slate-700 px-3 py-2.5 text-xs"
-            >
-              학생 변경
-            </button>
-          </div>
-        )}
+          {isRegistered && (
+            <>
+              <button
+                onClick={handleSaveScore}
+                disabled={isSaving || totalQuestions === 0}
+                className="btn-arcade btn-arcade-yellow px-4 py-2.5 text-xs font-bold flex items-center gap-1.5"
+              >
+                <Save className="w-4 h-4" />
+                <span>Supabase에 기록 저장</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  setIsRegistered(false);
+                  setStudentName("");
+                }}
+                className="btn-arcade bg-slate-800 text-slate-300 border-slate-700 px-3 py-2.5 text-xs"
+              >
+                학생 변경
+              </button>
+            </>
+          )}
+        </div>
       </div>
 
       {/* Step 1: Registration Form */}
@@ -323,17 +370,14 @@ export default function LinearExpressionGame() {
                 [ 다음 일차식을 괄호를 풀고 동류항끼리 계산하여 간단히 하세요 ]
               </div>
 
-              {/* Expression Equation */}
               <div className="text-3xl sm:text-5xl font-black tracking-wider text-slate-100 font-mono py-3 drop-shadow-[0_0_15px_rgba(250,204,21,0.3)]">
                 {currentProblem.displayStr}
               </div>
 
-              {/* Form Input for Ax + B */}
               <form onSubmit={handleSubmitAnswer} className="max-w-md mx-auto space-y-5">
                 <div className="flex items-center justify-center gap-2 sm:gap-3 text-lg font-mono">
                   <span className="text-slate-400 font-bold sm:text-xl font-sans">=</span>
 
-                  {/* Coefficient of x input */}
                   <div className="flex items-center gap-1">
                     <input
                       type="number"
@@ -348,7 +392,6 @@ export default function LinearExpressionGame() {
 
                   <span className="text-2xl font-extrabold text-slate-400">+</span>
 
-                  {/* Constant term input */}
                   <div className="flex items-center gap-1">
                     <input
                       type="number"
@@ -362,7 +405,7 @@ export default function LinearExpressionGame() {
                 </div>
 
                 <p className="text-[11px] text-slate-400 font-mono">
-                  * 예시: 계산 결과가 $5x - 3$ 이면 [ 5 ] x + [ -3 ] 으로 입력합니다.
+                  * 예시: 계산 결과가 5x - 3 이면 [ 5 ] x + [ -3 ] 으로 입력합니다.
                 </p>
 
                 <button
@@ -374,7 +417,6 @@ export default function LinearExpressionGame() {
                 </button>
               </form>
 
-              {/* Feedback Alert */}
               <div
                 className={`p-3 rounded-xl text-sm font-semibold transition-all ${
                   feedback.type === "correct"
@@ -388,14 +430,16 @@ export default function LinearExpressionGame() {
               </div>
 
               {saveStatus && (
-                <div className="text-xs font-mono text-[#facc15] pt-1">{saveStatus}</div>
+                <div className="p-3 rounded-xl bg-slate-800/90 text-xs font-mono text-[#facc15] border border-slate-700 leading-relaxed">
+                  {saveStatus}
+                </div>
               )}
             </div>
           )}
         </div>
       )}
 
-      {/* Step 3: Supabase Leaderboard Table */}
+      {/* Leaderboard */}
       <div className="pt-6 border-t border-slate-800 space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-bold text-slate-200 flex items-center gap-2">
@@ -438,7 +482,7 @@ export default function LinearExpressionGame() {
           </div>
         ) : (
           <div className="p-6 rounded-2xl bg-slate-950/40 border border-slate-800 text-center text-xs text-slate-500 font-mono">
-            등록된 Supabase 기록이 없습니다. 일차식 문제를 풀고 최고 기록을 등록해보세요!
+            등록된 점수가 없습니다. 점수를 기록해 첫 번째 명예의 전당에 올라보세요!
           </div>
         )}
       </div>
