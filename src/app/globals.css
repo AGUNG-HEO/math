@@ -1,0 +1,89 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-navy: #0f172a;
+  --neon-cyan: #00f0ff;
+  --pixel-pink: #ff007f;
+  --bright-yellow: #facc15;
+  --background: #0f172a;
+  --foreground: #f8fafc;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-inter), system-ui, sans-serif;
+  overflow-x: hidden;
+}
+
+/* 🎮 Arcade 3D Button Shadows & Push Effects */
+.btn-arcade {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  border-radius: 0.75rem;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+  cursor: pointer;
+}
+
+.btn-arcade:hover {
+  transform: translateY(-2px);
+}
+
+.btn-arcade:active {
+  transform: translateY(4px) !important;
+  box-shadow: 0 0 0 transparent !important;
+}
+
+/* Neon Cyan Arcade Button */
+.btn-arcade-cyan {
+  background-color: #00f0ff;
+  color: #0f172a;
+  box-shadow: 0 6px 0 0 #0099aa, 0 8px 15px rgba(0, 240, 255, 0.4);
+}
+.btn-arcade-cyan:hover {
+  box-shadow: 0 8px 0 0 #0099aa, 0 12px 20px rgba(0, 240, 255, 0.5);
+}
+.btn-arcade-cyan:active {
+  box-shadow: 0 2px 0 0 #0099aa !important;
+}
+
+/* Pixel Pink Arcade Button */
+.btn-arcade-pink {
+  background-color: #ff007f;
+  color: #ffffff;
+  box-shadow: 0 6px 0 0 #b30059, 0 8px 15px rgba(255, 0, 127, 0.4);
+}
+.btn-arcade-pink:hover {
+  box-shadow: 0 8px 0 0 #b30059, 0 12px 20px rgba(255, 0, 127, 0.5);
+}
+.btn-arcade-pink:active {
+  box-shadow: 0 2px 0 0 #b30059 !important;
+}
+
+/* Bright Yellow Arcade Button */
+.btn-arcade-yellow {
+  background-color: #facc15;
+  color: #0f172a;
+  box-shadow: 0 6px 0 0 #ca8a04, 0 8px 15px rgba(250, 204, 21, 0.4);
+}
+.btn-arcade-yellow:hover {
+  box-shadow: 0 8px 0 0 #ca8a04, 0 12px 20px rgba(250, 204, 21, 0.5);
+}
+.btn-arcade-yellow:active {
+  box-shadow: 0 2px 0 0 #ca8a04 !important;
+}
+
+/* Custom Glow Effects */
+.glow-cyan {
+  text-shadow: 0 0 12px rgba(0, 240, 255, 0.6);
+}
+.glow-pink {
+  text-shadow: 0 0 12px rgba(255, 0, 127, 0.6);
+}
