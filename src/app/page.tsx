@@ -3,7 +3,6 @@
 import React, { useState, useRef } from "react";
 import {
   Gamepad2,
-  Sparkles,
   Calculator,
   PenTool,
   Gamepad,
@@ -45,7 +44,7 @@ export default function Home() {
             </div>
           </div>
 
-          {/* 상단 네비게이션 전용 메뉴 (모든 기능 선택) */}
+          {/* 상단 네비게이션 전용 메뉴 */}
           <nav className="flex flex-wrap items-center justify-center gap-2 text-xs sm:text-sm font-semibold">
             <button
               onClick={() => handleSelectTab("chatbot")}
@@ -98,34 +97,15 @@ export default function Home() {
         </div>
       </header>
 
-      {/* ==================== 메인 화면 (Hero Section) ==================== */}
-      <main className="flex-1 flex flex-col items-center justify-center px-6 py-8 relative overflow-hidden">
+      {/* ==================== 메인 화면 (Main Workspace) ==================== */}
+      <main className="flex-1 flex flex-col items-center justify-start px-4 sm:px-6 py-6 relative overflow-hidden">
         {/* 네온 배경 장식 라이트 */}
         <div className="absolute top-1/4 -left-20 w-80 h-80 bg-[#00f0ff]/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-1/4 -right-20 w-80 h-80 bg-[#ff007f]/10 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="max-w-5xl mx-auto text-center z-10 space-y-6 w-full">
-          {/* 서브 뱃지 */}
-          <div className="inline-flex items-center space-x-2 px-4 py-2 rounded-full bg-slate-800/80 border border-[#00f0ff]/30 text-xs font-mono text-[#00f0ff] shadow-[0_0_12px_rgba(0,240,255,0.15)]">
-            <Sparkles className="w-4 h-4 text-[#facc15]" />
-            <span>AI POWERED MATH LEARNING PLATFORM</span>
-          </div>
-
-          {/* 메인 타이틀 */}
-          <h1 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight">
-            <span className="block text-slate-100">아궁진영의 인터랙티브</span>
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#00f0ff] via-[#facc15] to-[#ff007f] glow-cyan">
-              네온 수학교실
-            </span>
-          </h1>
-
-          {/* 설명 */}
-          <p className="text-slate-300 text-sm sm:text-base max-w-2xl mx-auto leading-relaxed font-normal">
-            상단 네비게이션 바에서 원하는 학습 기능(AI 챗봇, 일차식 계산, 일차방정식, 소수 게임)을 선택하세요!
-          </p>
-
+        <div className="max-w-5xl mx-auto text-center z-10 w-full">
           {/* ==================== 메인 콘텐츠 섹션 ==================== */}
-          <div ref={gameRef} className="pt-6 transition-all duration-500">
+          <div ref={gameRef} className="transition-all duration-500">
             {activeTab === "chatbot" && <MathChatbot />}
             {activeTab === "expression" && <LinearExpressionGame />}
             {activeTab === "linear" && <LinearEquationGame />}
