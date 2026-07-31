@@ -1,15 +1,16 @@
 "use client";
 
 import React, { useState, useRef } from "react";
-import { Gamepad2, Sparkles, PlusCircle, BookOpen, Trophy, Calculator, Gamepad } from "lucide-react";
+import { Gamepad2, Sparkles, PlusCircle, BookOpen, Trophy, Calculator, PenTool, Gamepad } from "lucide-react";
 import SieveGame from "@/components/SieveGame";
 import LinearEquationGame from "@/components/LinearEquationGame";
+import LinearExpressionGame from "@/components/LinearExpressionGame";
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState<"sieve" | "linear">("linear");
+  const [activeTab, setActiveTab] = useState<"expression" | "linear" | "sieve">("expression");
   const gameRef = useRef<HTMLDivElement>(null);
 
-  const handleSelectTab = (tab: "sieve" | "linear") => {
+  const handleSelectTab = (tab: "expression" | "linear" | "sieve") => {
     setActiveTab(tab);
     setTimeout(() => {
       gameRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -31,13 +32,22 @@ export default function Home() {
                 아궁진영의 수학교실
               </span>
               <span className="text-[10px] font-mono text-slate-400 tracking-wider">
-                MATH ARCADE & SUPABASE v1.0
+                MATH ARCADE & SUPABASE v2.0
               </span>
             </div>
           </div>
 
-          {/* 네비게이션 공간 */}
+          {/* 네비게이션 메뉴 */}
           <nav className="hidden md:flex items-center space-x-6 text-sm font-semibold">
+            <button
+              onClick={() => handleSelectTab("expression")}
+              className={`transition-colors flex items-center gap-1.5 ${
+                activeTab === "expression" ? "text-[#facc15]" : "text-slate-300 hover:text-[#facc15]"
+              }`}
+            >
+              <PenTool className="w-4 h-4 text-[#facc15]" />
+              일차식 덧셈·뺄셈
+            </button>
             <button
               onClick={() => handleSelectTab("linear")}
               className={`transition-colors flex items-center gap-1.5 ${
@@ -63,32 +73,43 @@ export default function Home() {
       {/* ==================== 메인 화면 (Hero Section) ==================== */}
       <main className="flex-1 flex flex-col items-center justify-center px-6 py-12 relative overflow-hidden">
         {/* 네온 배경 장식 라이트 */}
-        <div className="absolute top-1/4 -left-20 w-80 h-80 bg-[#00f0ff]/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-1/4 -left-20 w-80 h-80 bg-[#facc15]/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-1/4 -right-20 w-80 h-80 bg-[#ff007f]/10 rounded-full blur-3xl pointer-events-none" />
 
         <div className="max-w-5xl mx-auto text-center z-10 space-y-8 w-full">
           {/* 서브 뱃지 */}
-          <div className="inline-flex items-center space-x-2 px-4 py-2 rounded-full bg-slate-800/80 border border-[#00f0ff]/30 text-xs font-mono text-[#00f0ff] shadow-[0_0_12px_rgba(0,240,255,0.15)]">
-            <Sparkles className="w-4 h-4 text-[#facc15]" />
-            <span>SUPABASE INTEGRATED MATH PLATFORM</span>
+          <div className="inline-flex items-center space-x-2 px-4 py-2 rounded-full bg-slate-800/80 border border-[#facc15]/30 text-xs font-mono text-[#facc15] shadow-[0_0_12px_rgba(250,204,21,0.15)]">
+            <Sparkles className="w-4 h-4 text-[#00f0ff]" />
+            <span>INTERACTIVE MATH & SUPABASE DB</span>
           </div>
 
-          {/* 환영 문구 */}
+          {/* 메인 타이틀 */}
           <h1 className="text-4xl sm:text-6xl font-black tracking-tight leading-tight">
-            <span className="block text-slate-100">일차방정식 풀기 &</span>
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#ff007f] via-[#facc15] to-[#00f0ff] glow-pink">
-              Supabase 점수 저장
+            <span className="block text-slate-100">일차식 덧셈·뺄셈 &</span>
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#facc15] via-[#ff007f] to-[#00f0ff] glow-pink">
+              Supabase 실시간 저장
             </span>
           </h1>
 
-          {/* 간단한 설명 */}
+          {/* 설명 */}
           <p className="text-slate-300 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed font-normal">
-            방정식을 풀고 맞춘 문제 수를 Supabase 클라우드 데이터베이스에 기록해보세요!
-            친구들과의 실시간 랭킹도 한눈에 확인할 수 있습니다.
+            동류항끼리 묶어 일차식을 계산하고 맞춘 문제 수를 Supabase 데이터베이스에 기록해보세요!
+            실시간 리더보드로 명예의 전당 점수를 바로 확인할 수 있습니다.
           </p>
 
           {/* 탭 전환 버튼 모음 */}
           <div className="pt-2 flex flex-wrap items-center justify-center gap-4">
+            <button
+              type="button"
+              onClick={() => handleSelectTab("expression")}
+              className={`btn-arcade px-8 py-4 text-base tracking-wide flex items-center gap-2 ${
+                activeTab === "expression" ? "btn-arcade-yellow" : "bg-slate-800 text-slate-300 border-slate-700"
+              }`}
+            >
+              <PenTool className="w-5 h-5" />
+              <span>✏️ 일차식 덧셈·뺄셈 (Supabase 연동)</span>
+            </button>
+
             <button
               type="button"
               onClick={() => handleSelectTab("linear")}
@@ -97,7 +118,7 @@ export default function Home() {
               }`}
             >
               <Calculator className="w-5 h-5" />
-              <span>📐 일차방정식 챌린지 (Supabase 연동)</span>
+              <span>📐 일차방정식 챌린지</span>
             </button>
 
             <button
@@ -108,13 +129,15 @@ export default function Home() {
               }`}
             >
               <Gamepad className="w-5 h-5" />
-              <span>🕹️ 에라토스테네스의 체 게임</span>
+              <span>🕹️ 에라토스테네스의 체</span>
             </button>
           </div>
 
           {/* ==================== 게임 컨테이너 섹션 ==================== */}
           <div ref={gameRef} className="pt-10 transition-all duration-500">
-            {activeTab === "linear" ? <LinearEquationGame /> : <SieveGame />}
+            {activeTab === "expression" && <LinearExpressionGame />}
+            {activeTab === "linear" && <LinearEquationGame />}
+            {activeTab === "sieve" && <SieveGame />}
           </div>
         </div>
       </main>
