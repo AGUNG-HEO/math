@@ -1,7 +1,20 @@
-import React from "react";
-import { Gamepad2, Sparkles, PlusCircle, BookOpen, Trophy, Cpu } from "lucide-react";
+"use client";
+
+import React, { useState, useRef } from "react";
+import { Gamepad2, Sparkles, PlusCircle, BookOpen, Trophy, Cpu, Gamepad } from "lucide-react";
+import SieveGame from "@/components/SieveGame";
 
 export default function Home() {
+  const [showGame, setShowGame] = useState<boolean>(false);
+  const gameRef = useRef<HTMLDivElement>(null);
+
+  const handleToggleGame = () => {
+    setShowGame(true);
+    setTimeout(() => {
+      gameRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, 100);
+  };
+
   return (
     <div className="min-h-screen flex flex-col justify-between bg-[#0f172a] text-slate-100 font-sans selection:bg-[#ff007f] selection:text-white">
       {/* ==================== 상단 헤더 (Header Bar) ==================== */}
@@ -32,30 +45,31 @@ export default function Home() {
               학습 코스
             </a>
             <a
-              href="#features"
+              href="#sieve-game-section"
+              onClick={handleToggleGame}
               className="text-slate-300 hover:text-[#facc15] transition-colors flex items-center gap-1.5"
             >
-              <Trophy className="w-4 h-4 text-[#facc15]" />
-              대시보드
+              <Gamepad className="w-4 h-4 text-[#facc15]" />
+              에라토스테네스의 체
             </a>
             <a
-              href="#about"
+              href="#features"
               className="text-slate-300 hover:text-[#ff007f] transition-colors flex items-center gap-1.5"
             >
-              <Cpu className="w-4 h-4 text-[#ff007f]" />
-              설정
+              <Trophy className="w-4 h-4 text-[#ff007f]" />
+              대시보드
             </a>
           </nav>
         </div>
       </header>
 
       {/* ==================== 메인 화면 (Hero Section) ==================== */}
-      <main className="flex-1 flex flex-col items-center justify-center px-6 py-16 relative overflow-hidden">
+      <main className="flex-1 flex flex-col items-center justify-center px-6 py-12 relative overflow-hidden">
         {/* 네온 배경 장식 라이트 (Neon Glow Accents) */}
         <div className="absolute top-1/4 -left-20 w-80 h-80 bg-[#00f0ff]/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-1/4 -right-20 w-80 h-80 bg-[#ff007f]/10 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="max-w-4xl mx-auto text-center z-10 space-y-8">
+        <div className="max-w-5xl mx-auto text-center z-10 space-y-8 w-full">
           {/* 서브 뱃지 */}
           <div className="inline-flex items-center space-x-2 px-4 py-2 rounded-full bg-slate-800/80 border border-[#00f0ff]/30 text-xs font-mono text-[#00f0ff] shadow-[0_0_12px_rgba(0,240,255,0.15)]">
             <Sparkles className="w-4 h-4 text-[#facc15]" />
@@ -76,28 +90,36 @@ export default function Home() {
             수학을 배우는 차세대 네온 게이밍 학습 공간입니다.
           </p>
 
-          {/* 기능 추가용 가짜 (Placeholder) 3D 입체 버튼 1개 */}
+          {/* 새로운 학습 기능 추가하기 버튼 */}
           <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
             <button
               type="button"
-              className="btn-arcade btn-arcade-cyan px-8 py-4 text-base tracking-wide flex items-center gap-2"
+              onClick={handleToggleGame}
+              className="btn-arcade btn-arcade-cyan px-8 py-4 text-base tracking-wide flex items-center gap-2 group shadow-lg"
             >
-              <PlusCircle className="w-5 h-5" />
-              <span>새로운 학습 기능 추가하기</span>
+              <PlusCircle className="w-5 h-5 group-hover:rotate-90 transition-transform" />
+              <span>새로운 학습 기능 추가하기 (에라토스테네스의 체)</span>
             </button>
           </div>
 
-          {/* 가짜 기능 카드 그리드 (Placeholder Demo Cards) */}
-          <div className="pt-12 grid grid-cols-1 sm:grid-cols-3 gap-6 text-left">
+          {/* ==================== 에라토스테네스의 체 게임 섹션 ==================== */}
+          {(showGame || true) && (
+            <div id="sieve-game-section" ref={gameRef} className="pt-10 transition-all duration-500">
+              <SieveGame />
+            </div>
+          )}
+
+          {/* 기능 카드 그리드 (Demo Cards) */}
+          <div className="pt-16 grid grid-cols-1 sm:grid-cols-3 gap-6 text-left">
             <div className="p-6 rounded-2xl bg-slate-800/50 border border-slate-700/60 hover:border-[#00f0ff]/60 transition-all shadow-lg hover:shadow-[0_0_20px_rgba(0,240,255,0.15)]">
               <div className="w-10 h-10 rounded-xl bg-[#00f0ff]/10 flex items-center justify-center text-[#00f0ff] mb-4 font-extrabold">
                 01
               </div>
               <h3 className="text-lg font-bold text-slate-100 mb-2">
-                인터랙티브 문제집
+                에라토스테네스의 체
               </h3>
               <p className="text-sm text-slate-400">
-                실시간 피드백과 반응형 3D 버튼으로 몰입감 넘치는 수학교실.
+                1부터 100까지 소수의 배수를 신나게 타격하며 진짜 소수를 찾는 아케이드 게임.
               </p>
             </div>
 
@@ -109,7 +131,7 @@ export default function Home() {
                 네온 게이밍 랭킹
               </h3>
               <p className="text-sm text-slate-400">
-                선생님과 학생들이 다 함께 스코어를 겨루는 아케이드 리그.
+                선생님과 학생들이 다 함께 스코어를 겨루는 아케이드 수학 리그.
               </p>
             </div>
 
@@ -121,7 +143,7 @@ export default function Home() {
                 맞춤형 학습 리포트
               </h3>
               <p className="text-sm text-slate-400">
-                개인별 성장 수치와 정확도를 한눈에 분석하는 대시보드.
+                개인별 성장 수치와 소수 정답률을 한눈에 분석하는 대시보드.
               </p>
             </div>
           </div>
